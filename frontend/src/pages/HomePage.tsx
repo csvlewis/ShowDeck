@@ -1,3 +1,10 @@
+import PopularShows from "@/components/PopularShows";
+
 export default function HomePage() {
-  return <h1 className="text-3xl font-bold">Welcome to ShowDeck</h1>;
+  return (
+    <div className="App">
+      <h1>ShowDeck</h1>
+      <PopularShows />
+    </div>
+  );
 }

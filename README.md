@@ -11,7 +11,7 @@ This project is currently under development. Core scaffolding for the frontend a
 ### Frontend
 
 - React + TypeScript
-- TailwindCSS + shadcn/ui
+- TailwindCSS
 - Redux Toolkit
 - React Router
 
