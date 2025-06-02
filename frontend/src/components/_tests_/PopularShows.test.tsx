@@ -1,5 +1,6 @@
 import { describe, test, expect, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import PopularShows from "../PopularShows";
 
 vi.mock("@/api/shows", () => ({
@@ -13,7 +14,11 @@ describe("PopularShows", () => {
     (fetchPopularShows as ReturnType<typeof vi.fn>).mockReturnValue(
       new Promise(() => {})
     );
-    render(<PopularShows />);
+    render(
+      <MemoryRouter>
+        <PopularShows />
+      </MemoryRouter>
+    );
     expect(screen.getByText(/loading popular shows/i)).toBeInTheDocument();
   });
 
@@ -36,7 +41,11 @@ describe("PopularShows", () => {
       mockShows
     );
 
-    render(<PopularShows />);
+    render(
+      <MemoryRouter>
+        <PopularShows />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByText("Popular TV Shows")).toBeInTheDocument();
@@ -53,7 +62,11 @@ describe("PopularShows", () => {
       new Error("Failed to fetch")
     );
 
-    render(<PopularShows />);
+    render(
+      <MemoryRouter>
+        <PopularShows />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByText(/error/i)).toBeInTheDocument();

@@ -1,9 +1,11 @@
+import { Link } from "react-router-dom";
+
 export interface MediaCardProps {
   id: number;
   title: string;
   description: string;
   imagePath?: string;
-  imageBaseUrl?: string; // optional base URL for the image
+  imageBaseUrl?: string;
 }
 
 export default function MediaCard({
@@ -27,11 +29,13 @@ export default function MediaCard({
     >
       <h3>{title}</h3>
       {imagePath && (
-        <img
-          src={`${imageBaseUrl}${imagePath}`}
-          alt={`${title} poster`}
-          style={{ maxWidth: "100%", borderRadius: 4 }}
-        />
+        <Link to={`/show/${id}`}>
+          <img
+            src={`${imageBaseUrl}${imagePath}`}
+            alt={`${title} poster`}
+            style={{ maxWidth: "100%", borderRadius: 4 }}
+          />
+        </Link>
       )}
       <p>{description}</p>
     </div>

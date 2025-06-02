@@ -18,7 +18,7 @@ app.get("/health", (_req, res) => {
 });
 
 // Popular TV shows route
-app.get("/tv/popular", async (_req, res) => {
+app.get("/shows/popular", async (_req, res) => {
   try {
     const response = await axios.get(`${TMDB_BASE_URL}/tv/popular`, {
       params: {
@@ -38,7 +38,7 @@ app.get("/tv/popular", async (_req, res) => {
 });
 
 // Single TV show details route
-app.get("/tv/:id", async (req, res) => {
+app.get("/show/:id", async (req, res) => {
   const { id } = req.params;
 
   try {

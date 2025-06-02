@@ -1,5 +1,6 @@
 import { describe, test, expect, vi, type Mock } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import HomePage from "@/pages/HomePage";
 
 vi.mock("@/api/shows", () => ({
@@ -27,7 +28,11 @@ describe("HomePage", () => {
 
     (fetchPopularShows as Mock).mockResolvedValue(mockShows);
 
-    render(<HomePage />);
+    render(
+      <MemoryRouter>
+        <HomePage />
+      </MemoryRouter>
+    );
 
     expect(screen.getByText(/loading popular shows/i)).toBeInTheDocument();
 

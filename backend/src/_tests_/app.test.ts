@@ -21,7 +21,7 @@ describe("Backend API routes", () => {
     });
   });
 
-  describe("GET /tv/popular", () => {
+  describe("GET /shows/popular", () => {
     test("returns popular TV shows", async () => {
       const mockResponse = {
         results: [
@@ -35,7 +35,7 @@ describe("Backend API routes", () => {
         .query(true)
         .reply(200, mockResponse);
 
-      const res = await request(app).get("/tv/popular");
+      const res = await request(app).get("/shows/popular");
       expect(res.status).toBe(200);
       expect(res.body).toEqual({ results: mockResponse.results });
     });
@@ -46,13 +46,13 @@ describe("Backend API routes", () => {
         .query(true)
         .replyWithError("TMDB API failure");
 
-      const res = await request(app).get("/tv/popular");
+      const res = await request(app).get("/shows/popular");
       expect(res.status).toBe(500);
       expect(res.body).toEqual({ error: "Failed to fetch popular TV shows" });
     });
   });
 
-  describe("GET /tv/:id", () => {
+  describe("GET /show/:id", () => {
     const showId = 123;
 
     test("returns TV show details for a valid id", async () => {
@@ -68,7 +68,7 @@ describe("Backend API routes", () => {
         .query(true)
         .reply(200, mockShowDetail);
 
-      const res = await request(app).get(`/tv/${showId}`);
+      const res = await request(app).get(`/show/${showId}`);
 
       expect(res.status).toBe(200);
       expect(res.body).toEqual(mockShowDetail);
@@ -79,7 +79,7 @@ describe("Backend API routes", () => {
         status_message: "The resource you requested could not be found.",
       });
 
-      const res = await request(app).get(`/tv/${showId}`);
+      const res = await request(app).get(`/show/${showId}`);
 
       expect(res.status).toBe(404);
       expect(res.body).toEqual({ error: "Show not found" });
@@ -91,7 +91,7 @@ describe("Backend API routes", () => {
         .query(true)
         .replyWithError("TMDB API failure");
 
-      const res = await request(app).get(`/tv/${showId}`);
+      const res = await request(app).get(`/show/${showId}`);
 
       expect(res.status).toBe(500);
       expect(res.body).toEqual({ error: "Failed to fetch TV show details" });
