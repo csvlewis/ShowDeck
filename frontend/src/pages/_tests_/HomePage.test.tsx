@@ -1,15 +1,25 @@
-import { describe, test, expect, vi, type Mock } from "vitest";
+import { describe, test, expect, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { Provider } from "react-redux";
+import { configureStore } from "@reduxjs/toolkit";
+
 import HomePage from "@/pages/HomePage";
+import authReducer from "@/store/authSlice";
 
 vi.mock("@/api/shows", () => ({
   fetchPopularShows: vi.fn(),
 }));
-
 import { fetchPopularShows } from "@/api/shows";
 
 describe("HomePage", () => {
+  const createTestStore = () =>
+    configureStore({
+      reducer: {
+        auth: authReducer,
+      },
+    });
+
   test("renders heading, shows loading, then renders popular shows", async () => {
     const mockShows = [
       {
@@ -26,12 +36,18 @@ describe("HomePage", () => {
       },
     ];
 
-    (fetchPopularShows as Mock).mockResolvedValue(mockShows);
+    (fetchPopularShows as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockShows
+    );
+
+    const store = createTestStore();
 
     render(
-      <MemoryRouter>
-        <HomePage />
-      </MemoryRouter>
+      <Provider store={store}>
+        <MemoryRouter>
+          <HomePage />
+        </MemoryRouter>
+      </Provider>
     );
 
     expect(screen.getByText(/loading popular shows/i)).toBeInTheDocument();
@@ -40,9 +56,8 @@ describe("HomePage", () => {
       expect(screen.getByText("Popular TV Shows")).toBeInTheDocument();
     });
 
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-      "ShowDeck"
-    );
+    const heading = screen.getAllByRole("heading", { level: 2 })[0];
+    expect(heading).toHaveTextContent("ShowDeck");
 
     for (const show of mockShows) {
       expect(screen.getByText(show.name)).toBeInTheDocument();
