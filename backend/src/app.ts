@@ -1,23 +1,22 @@
 import express from "express";
 import cors from "cors";
 import axios from "axios";
-
 import { TMDB_BASE_URL, TMDB_API_KEY } from "@/config/tmdb";
+import authRoutes from "@/routes/auth";
 
 const app = express();
+app.use(cors({ origin: "http://localhost:5173" }));
+app.use(express.json());
 
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-  })
-);
-
-// Health check route
+// Health check
 app.get("/health", (_req, res) => {
   res.json({ status: "OK", message: "ShowDeck backend is running" });
 });
 
-// Popular TV shows route
+// Register/login/logout routes
+app.use("/auth", authRoutes);
+
+// Popular TV shows
 app.get("/shows/popular", async (_req, res) => {
   try {
     const response = await axios.get(`${TMDB_BASE_URL}/tv/popular`, {
@@ -37,7 +36,7 @@ app.get("/shows/popular", async (_req, res) => {
   }
 });
 
-// Single TV show details route
+// Single TV show details
 app.get("/show/:id", async (req, res) => {
   const { id } = req.params;
 

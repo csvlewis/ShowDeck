@@ -4,6 +4,32 @@ import request from "supertest";
 import nock from "nock";
 import app from "../app";
 import { TMDB_BASE_URL } from "@/config/tmdb";
+import { db } from "@/db";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+jest.mock("@/db", () => ({
+  db: {
+    query: {
+      users: {
+        findFirst: jest.fn(),
+      },
+    },
+    insert: jest.fn(() => ({
+      values: jest.fn().mockReturnThis(),
+      returning: jest.fn(),
+    })),
+  },
+}));
+
+jest.mock("bcrypt", () => ({
+  hash: jest.fn(),
+  compare: jest.fn(),
+}));
+
+jest.mock("jsonwebtoken", () => ({
+  sign: jest.fn(),
+}));
 
 describe("Backend API routes", () => {
   afterEach(() => {
@@ -17,6 +43,105 @@ describe("Backend API routes", () => {
       expect(res.body).toEqual({
         status: "OK",
         message: "ShowDeck backend is running",
+      });
+    });
+  });
+
+  describe("Auth routes", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    describe("POST /auth/register", () => {
+      test("registers a new user", async () => {
+        const mockUser = { id: 1, email: "new@example.com" };
+        (db.query.users.findFirst as jest.Mock).mockResolvedValue(undefined);
+        (bcrypt.hash as jest.Mock).mockResolvedValue("hashedPassword");
+        (db.insert as jest.Mock).mockReturnValue({
+          values: jest.fn().mockReturnThis(),
+          returning: jest.fn().mockResolvedValue([mockUser]),
+        });
+        (jwt.sign as jest.Mock).mockReturnValue("mockToken");
+
+        const res = await request(app)
+          .post("/auth/register")
+          .send({ email: "new@example.com", password: "password123" });
+
+        expect(res.status).toBe(201);
+        expect(res.body).toEqual({
+          token: "mockToken",
+          user: { id: 1, email: "new@example.com" },
+        });
+      });
+
+      test("fails if email or password missing", async () => {
+        const res = await request(app)
+          .post("/auth/register")
+          .send({ email: "" });
+
+        expect(res.status).toBe(400);
+        expect(res.body).toEqual({ error: "Email and password required" });
+      });
+
+      test("fails if user already exists", async () => {
+        (db.query.users.findFirst as jest.Mock).mockResolvedValue({ id: 1 });
+
+        const res = await request(app)
+          .post("/auth/register")
+          .send({ email: "existing@example.com", password: "123" });
+
+        expect(res.status).toBe(409);
+        expect(res.body).toEqual({ error: "User already exists" });
+      });
+    });
+
+    describe("POST /auth/login", () => {
+      test("logs in an existing user", async () => {
+        const mockUser = {
+          id: 2,
+          email: "user@example.com",
+          password: "hashed",
+        };
+        (db.query.users.findFirst as jest.Mock).mockResolvedValue(mockUser);
+        (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+        (jwt.sign as jest.Mock).mockReturnValue("loginToken");
+
+        const res = await request(app)
+          .post("/auth/login")
+          .send({ email: "user@example.com", password: "password123" });
+
+        expect(res.status).toBe(200);
+        expect(res.body).toEqual({
+          token: "loginToken",
+          user: { id: 2, email: "user@example.com" },
+        });
+      });
+
+      test("fails with invalid email", async () => {
+        (db.query.users.findFirst as jest.Mock).mockResolvedValue(undefined);
+
+        const res = await request(app)
+          .post("/auth/login")
+          .send({ email: "missing@example.com", password: "pass" });
+
+        expect(res.status).toBe(401);
+        expect(res.body).toEqual({ error: "Invalid email or password" });
+      });
+
+      test("fails with incorrect password", async () => {
+        (db.query.users.findFirst as jest.Mock).mockResolvedValue({
+          id: 3,
+          email: "user@example.com",
+          password: "hashed",
+        });
+        (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+        const res = await request(app)
+          .post("/auth/login")
+          .send({ email: "user@example.com", password: "wrongpass" });
+
+        expect(res.status).toBe(401);
+        expect(res.body).toEqual({ error: "Invalid email or password" });
       });
     });
   });
