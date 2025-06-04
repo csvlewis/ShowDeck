@@ -177,7 +177,7 @@ describe("Backend API routes", () => {
     });
   });
 
-  describe("GET /show/:id", () => {
+  describe("GET shows/:id", () => {
     const showId = 123;
 
     test("returns TV show details for a valid id", async () => {
@@ -193,7 +193,7 @@ describe("Backend API routes", () => {
         .query(true)
         .reply(200, mockShowDetail);
 
-      const res = await request(app).get(`/show/${showId}`);
+      const res = await request(app).get(`/shows/${showId}`);
 
       expect(res.status).toBe(200);
       expect(res.body).toEqual(mockShowDetail);
@@ -204,7 +204,7 @@ describe("Backend API routes", () => {
         status_message: "The resource you requested could not be found.",
       });
 
-      const res = await request(app).get(`/show/${showId}`);
+      const res = await request(app).get(`/shows/${showId}`);
 
       expect(res.status).toBe(404);
       expect(res.body).toEqual({ error: "Show not found" });
@@ -216,7 +216,7 @@ describe("Backend API routes", () => {
         .query(true)
         .replyWithError("TMDB API failure");
 
-      const res = await request(app).get(`/show/${showId}`);
+      const res = await request(app).get(`/shows/${showId}`);
 
       expect(res.status).toBe(500);
       expect(res.body).toEqual({ error: "Failed to fetch TV show details" });

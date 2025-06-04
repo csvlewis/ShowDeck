@@ -37,7 +37,7 @@ app.get("/shows/popular", async (_req, res) => {
 });
 
 // Single TV show details
-app.get("/show/:id", async (req, res) => {
+app.get("/shows/:id", async (req, res) => {
   const { id } = req.params;
 
   try {

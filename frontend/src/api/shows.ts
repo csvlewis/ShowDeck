@@ -24,7 +24,7 @@ export async function fetchPopularShows(): Promise<Show[]> {
 }
 
 export async function fetchShowById(id: number): Promise<ShowDetails> {
-  const response = await fetch(`http://localhost:4000/show/${id}`);
+  const response = await fetch(`http://localhost:4000/shows/${id}`);
   if (!response.ok) {
     throw new Error("Failed to fetch show details");
   }

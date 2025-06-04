@@ -15,9 +15,9 @@ describe("ShowDetailsPage", () => {
 
   function renderWithRouter() {
     render(
-      <MemoryRouter initialEntries={[`/show/${mockId}`]}>
+      <MemoryRouter initialEntries={[`/shows/${mockId}`]}>
         <Routes>
-          <Route path="/show/:id" element={<ShowDetailsPage />} />
+          <Route path="/shows/:id" element={<ShowDetailsPage />} />
         </Routes>
       </MemoryRouter>
     );

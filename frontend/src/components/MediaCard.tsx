@@ -29,7 +29,7 @@ export default function MediaCard({
     >
       <h3>{title}</h3>
       {imagePath && (
-        <Link to={`/show/${id}`}>
+        <Link to={`/shows/${id}`}>
           <img
             src={`${imageBaseUrl}${imagePath}`}
             alt={`${title} poster`}
