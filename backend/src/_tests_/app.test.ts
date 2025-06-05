@@ -3,7 +3,6 @@ process.env.TMDB_API_KEY = "test_api_key";
 import request from "supertest";
 import axios from "axios";
 import app from "../app";
-import { TMDB_BASE_URL } from "@/config/tmdb";
 import { db } from "@/db";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
