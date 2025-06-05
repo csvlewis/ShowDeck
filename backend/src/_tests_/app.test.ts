@@ -1,9 +1,8 @@
 process.env.TMDB_API_KEY = "test_api_key";
 
 import request from "supertest";
-import nock from "nock";
+import axios from "axios";
 import app from "../app";
-import { TMDB_BASE_URL } from "@/config/tmdb";
 import { db } from "@/db";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -31,9 +30,15 @@ jest.mock("jsonwebtoken", () => ({
   sign: jest.fn(),
 }));
 
+jest.mock("axios");
+const mockedAxios = axios as jest.Mocked<typeof axios>;
+mockedAxios.isAxiosError.mockImplementation(
+  (err: any): err is any => !!err.isAxiosError
+);
+
 describe("Backend API routes", () => {
   afterEach(() => {
-    nock.cleanAll();
+    jest.clearAllMocks();
   });
 
   describe("GET /health", () => {
@@ -155,10 +160,7 @@ describe("Backend API routes", () => {
         ],
       };
 
-      nock(TMDB_BASE_URL)
-        .get("/tv/popular")
-        .query(true)
-        .reply(200, mockResponse);
+      mockedAxios.get.mockResolvedValue({ data: mockResponse });
 
       const res = await request(app).get("/shows/popular");
       expect(res.status).toBe(200);
@@ -166,10 +168,7 @@ describe("Backend API routes", () => {
     });
 
     test("returns 500 on failure", async () => {
-      nock(TMDB_BASE_URL)
-        .get("/tv/popular")
-        .query(true)
-        .replyWithError("TMDB API failure");
+      mockedAxios.get.mockRejectedValue(new Error("TMDB API failure"));
 
       const res = await request(app).get("/shows/popular");
       expect(res.status).toBe(500);
@@ -188,10 +187,7 @@ describe("Backend API routes", () => {
         poster_path: "/mockpath.jpg",
       };
 
-      nock(TMDB_BASE_URL)
-        .get(`/tv/${showId}`)
-        .query(true)
-        .reply(200, mockShowDetail);
+      mockedAxios.get.mockResolvedValue({ data: mockShowDetail });
 
       const res = await request(app).get(`/shows/${showId}`);
 
@@ -200,8 +196,9 @@ describe("Backend API routes", () => {
     });
 
     test("returns 404 for non-existent show", async () => {
-      nock(TMDB_BASE_URL).get(`/tv/${showId}`).query(true).reply(404, {
-        status_message: "The resource you requested could not be found.",
+      mockedAxios.get.mockRejectedValue({
+        isAxiosError: true,
+        response: { status: 404 },
       });
 
       const res = await request(app).get(`/shows/${showId}`);
@@ -211,10 +208,7 @@ describe("Backend API routes", () => {
     });
 
     test("returns 500 on failure", async () => {
-      nock(TMDB_BASE_URL)
-        .get(`/tv/${showId}`)
-        .query(true)
-        .replyWithError("TMDB API failure");
+      mockedAxios.get.mockRejectedValue(new Error("TMDB API failure"));
 
       const res = await request(app).get(`/shows/${showId}`);
 
